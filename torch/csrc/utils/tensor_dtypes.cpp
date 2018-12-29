@@ -30,6 +30,8 @@ static std::pair<std::string, std::string> getDtypeNames(at::ScalarType scalarTy
       return std::make_pair("int16", "short");
     case at::ScalarType::Half:
       return std::make_pair("float16", "half");
+    case at::ScalarType::BFloat16:
+      return std::make_pair("bfloat16", "");
     case at::ScalarType::ComplexHalf:
       return std::make_pair("complex32", "");
     case at::ScalarType::ComplexFloat:
@@ -49,6 +51,7 @@ void initializeDtypes() {
 
   at::ScalarType all_scalar_types[] = {
     AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_SCALAR_TYPE)
+    at::ScalarType::BFloat16
   };
 
   for (at::ScalarType scalarType: all_scalar_types) {

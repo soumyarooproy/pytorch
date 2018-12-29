@@ -13,6 +13,7 @@
 #include "ATen/detail/CUDAHooksInterface.h"
 #include "ATen/detail/HIPHooksInterface.h"
 #include "ATen/detail/ComplexHooksInterface.h"
+#include "ATen/detail/BFloat16HooksInterface.h"
 #include "c10/util/Exception.h"
 
 #include <memory>
@@ -100,6 +101,11 @@ class CAFFE2_API Context {
       detail::getComplexHooks().registerComplexTypes(this);
     });
   }
+  void lazyInitBFloat16() {
+    std::call_once(bfloat16_init_, [&] {
+      detail::getBFloat16Hooks().registerBFloat16Type(this);
+    });
+  }
 
   THCState* getTHCState() {
     // AT_ASSERT(thc_state);
@@ -145,6 +151,7 @@ private:
   std::once_flag thc_init;
   std::once_flag thh_init;
   std::once_flag complex_init_;
+  std::once_flag bfloat16_init_;
   bool enabled_cudnn = true;
   bool deterministic_cudnn = false;
   bool benchmark_cudnn = false;

@@ -45,6 +45,9 @@ struct CAFFE2_API LegacyTypeInitInterface {
   virtual void initComplex() const {
     AT_ERROR("cannot use complex without ATen Complex library");
   }
+  virtual void initBFloat16() const {
+    AT_ERROR("cannot use bfloat16 without ATen BFloat16 library");
+  }
 };
 struct CAFFE2_API LegacyTypeInitArgs {};
 C10_DECLARE_REGISTRY(
@@ -146,11 +149,17 @@ private:
     }
   }
   void initForScalarType(ScalarType s) {
-    static std::once_flag once;
-    // Only complex may need initialization
+    static std::once_flag once_complex;
+    // Complex and any other custom types may need initialization
     if (isComplexType(s)) {
-      std::call_once(once, [] {
+      std::call_once(once_complex, [] {
         getLegacyTypeInit().initComplex();
+      });
+    }
+    static std::once_flag once_bfloat16;
+    if (isBFloat16Type(s)) {
+      std::call_once(once_bfloat16, [] {
+        getLegacyTypeInit().initBFloat16();
       });
     }
   }

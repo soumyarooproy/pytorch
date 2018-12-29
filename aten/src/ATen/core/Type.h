@@ -76,6 +76,7 @@ enum class TypeID {
   CPUComplexDouble,
   CUDAComplexFloat,
   CUDAComplexDouble,
+  CPUBFloat16,
   Undefined,
   NumOptions
 };

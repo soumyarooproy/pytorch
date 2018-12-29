@@ -37,6 +37,8 @@ static DLDataType getDLDataType(const Type& type) {
     case ScalarType::Half:
       dtype.code = DLDataTypeCode::kDLFloat;
       break;
+    case ScalarType::BFloat16:
+      throw std::logic_error("BFloat16 is not supported by dlpack");
     case ScalarType::ComplexHalf:
       throw std::logic_error("ComplexHalf is not supported by dlpack");
     case ScalarType::ComplexFloat:

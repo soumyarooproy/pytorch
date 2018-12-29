@@ -140,6 +140,9 @@ struct LegacyTypeInit : public LegacyTypeInitInterface {
   void initComplex() const override {
     globalContext().lazyInitComplex();
   }
+  void initBFloat16() const override {
+    globalContext().lazyInitBFloat16();
+  }
 };
 REGISTER_LEGACY_TYPE_INIT(LegacyTypeInit);
 
