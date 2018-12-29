@@ -42,6 +42,24 @@ Tensor& _s_copy__cpu(Tensor& self, const Tensor& src, bool non_blocking) {
     _s_copy_from(src, self, non_blocking);
     return self;
   }
+  // Support copying FROM:bfloat16 TO:float
+  //   In the python interpreter, this will enable operations such as:
+  //   >>> f = torch.randn(1, 2) # f is a cpu float tensor
+  //   >>> b = f.to(dtype=torch.bfloat16) # b is a cpu bfloat16 tensor
+  //
+  // No other conversion FROM:bfloat16 is supported; the subsequent dynamic
+  // dispatch code will ensure that appropriate error message is reported for
+  // those cases
+  if (self.type().scalarType() == at::ScalarType::Float
+      && src.type().scalarType() == at::ScalarType::BFloat16) {
+    using self_T = float;
+    using src_T = at::BFloat16;
+    at::CPU_tensor_apply2<self_T, src_T>(
+      self, src, [](self_T& self_val, const src_T& src_val) {
+        self_val = src_val;
+      });
+    return self;
+  }
   AT_DISPATCH_ALL_TYPES_AND_HALF(
       self.type(), "_copy__cpu", [&]() { ::_copy__cpu<scalar_t>(self, src); });
   return self;

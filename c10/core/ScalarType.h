@@ -2,6 +2,7 @@
 
 #include <c10/util/ArrayRef.h>
 #include <c10/Half.h>
+#include <c10/BFloat16.h>
 #include <c10/util/typeid.h>
 
 #include <cstdint>
@@ -68,6 +69,7 @@ enum class ScalarType : int8_t {
   n,
   AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_ENUM)
 #undef DEFINE_ENUM
+  BFloat16,
   Undefined,
   NumOptions
 };
@@ -79,6 +81,7 @@ static inline at::DataType scalarTypeToDataType(ScalarType scalar_type) {
 
   switch(scalar_type) {
     AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_CASE)
+    case ScalarType::BFloat16: return caffe2::TypeIdentifier::Get<at::BFloat16>();
     case ScalarType::Undefined: return at::DataType::uninitialized();
     default: AT_ERROR("Unrecognized Scalartype ", scalar_type, " (please report this error)");
   }
@@ -91,6 +94,7 @@ static inline caffe2::TypeMeta scalarTypeToTypeMeta(ScalarType scalar_type) {
 
   switch(scalar_type) {
     AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_CASE)
+    case ScalarType::BFloat16 : return caffe2::TypeMeta::Make<at::BFloat16>();
     case ScalarType::Undefined: return caffe2::TypeMeta();
     default: AT_ERROR("Unrecognized Scalartype ", scalar_type, " (please report this error)");
   }
@@ -104,6 +108,9 @@ static inline ScalarType typeMetaToScalarType(caffe2::TypeMeta dtype) {
   }
   AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_IF)
 #undef DEFINE_IF
+  if (dtype == caffe2::TypeMeta::Make<at::BFloat16>()) {
+    return ScalarType::BFloat16;
+  }
   if (dtype == caffe2::TypeMeta()) {
     return ScalarType::Undefined;
   }
@@ -130,6 +137,7 @@ static inline const char * toString(ScalarType t) {
 
   switch(t) {
     AT_FORALL_SCALAR_TYPES_WITH_COMPLEX(DEFINE_CASE)
+    case ScalarType::BFloat16 : return "BFloat16";
     default:
       return "UNKNOWN_SCALAR";
   }
@@ -168,6 +176,10 @@ static inline bool isComplexType(ScalarType t) {
           t == ScalarType::ComplexDouble);
 }
 
+static inline bool isBFloat16Type(ScalarType t) {
+  return t == ScalarType::BFloat16;
+}
+
 static inline ScalarType promoteTypes(ScalarType a, ScalarType b) {
   // This is generated according to NumPy's promote_types
   constexpr auto u1 = ScalarType::Byte;
@@ -184,6 +196,9 @@ static inline ScalarType promoteTypes(ScalarType a, ScalarType b) {
   }
   if (isComplexType(a) || isComplexType(b)) {
     AT_ERROR("promoteTypes with complex numbers is not handled yet; figure out what the correct rules should be");
+  }
+  if (isBFloat16Type(a) || isBFloat16Type(b)) {
+    AT_ERROR("promoteTypes for bfloat16 is not handled yet");
   }
   static constexpr ScalarType _promoteTypesLookup
       [static_cast<int>(ScalarType::NumOptions)]

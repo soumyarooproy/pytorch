@@ -30,6 +30,8 @@ class C10_API Scalar {
   // syntax v{ .member = ... } because it doesn't work on MSVC
 
   AT_FORALL_SCALAR_TYPES(DEFINE_IMPLICIT_CTOR)
+  // Define Scalar constructor for BFloat16 type
+  DEFINE_IMPLICIT_CTOR(at::BFloat16,BFloat16,d)
 
 #undef DEFINE_IMPLICIT_CTOR
 
@@ -58,6 +60,8 @@ class C10_API Scalar {
 
   // TODO: Support ComplexHalf accessor
   AT_FORALL_SCALAR_TYPES_WITH_COMPLEX_EXCEPT_COMPLEX_HALF(DEFINE_ACCESSOR)
+  // Define BFloat16 accessor
+  DEFINE_ACCESSOR(at::BFloat16,BFloat16,d)
 
   //also support scalar.to<int64_t>();
   template<typename T>
@@ -102,5 +106,7 @@ inline T Scalar::to<T>() { \
   return to##name(); \
 }
 AT_FORALL_SCALAR_TYPES_WITH_COMPLEX_EXCEPT_COMPLEX_HALF(DEFINE_TO)
+// Define Scalar conversion for BFloat16
+DEFINE_TO(at::BFloat16,BFloat16,d)
 #undef DEFINE_TO
 }

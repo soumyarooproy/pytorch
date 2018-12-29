@@ -1,5 +1,6 @@
 #include <c10/util/typeid.h>
 #include <c10/util/Exception.h>
+#include <c10/BFloat16.h>
 
 #include <atomic>
 
@@ -74,4 +75,6 @@ CAFFE_DEFINE_PREALLOCATED_KNOWN_TYPE(
 
 CAFFE_DEFINE_PREALLOCATED_KNOWN_TYPE(27, _CaffeHighestPreallocatedTypeId)
 
+// Add Bfloat16 as a Caffe2 dynamic type; but without a preallocated id
+CAFFE_KNOWN_TYPE(at::BFloat16)
 } // namespace caffe2
